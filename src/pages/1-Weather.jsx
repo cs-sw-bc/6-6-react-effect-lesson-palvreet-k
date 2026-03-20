@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 // API endpoint — Mississauga coordinates, returns current weather
 // https://api.open-meteo.com/v1/forecast?latitude=43.5890&longitude=-79.6441&current_weather=true
@@ -25,12 +27,39 @@ export default function WeatherOnMount() {
   //    - Use try / catch / finally
   //    - Check response.ok before parsing JSON
   //    - Set weather, error, and loading state accordingly
+  useEffect(() => {
 
+    async function fetchweather() {
+      try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          throw new Error('Some problem with API, try again')
+        }
+
+        //convert json to javascript
+        const data = await response.json();
+        setWeather(data.current_weather);
+      }
+      catch (err) {
+        setError(err.message);
+      }
+      finally {
+      setLoading(false);  // Weather displayed or error displayed so we have to stop loading message
+      }
+  }
+  fetchweather();
+  }, []); //one time only
 
   // 3. Handle the loading state
   //    For now render a plain text message
   //    TODO later: replace with MUI CircularProgress
-  if (loading) return <p>Loading weather...</p>;
+  if (loading)
+    return (
+    <Box sx={{ display: 'flex' }}>
+      <CircularProgress />
+    </Box>
+    );
 
   // 4. Handle the error state
   if (error) return <p>Error: {error}</p>;
@@ -42,8 +71,11 @@ export default function WeatherOnMount() {
       <h2>Current Weather — Mississauga</h2>
 
       {/* TODO: display weather.temperature */}
+      <p>Temperature: {weather.temperature}</p>
       {/* TODO: display weather.windspeed */}
+      <p>Windspeed: {weather.windspeed}</p>
       {/* TODO: display weather.weathercode */}
+      <p>Time: {weather.time}</p>
     </div>
   );
 }

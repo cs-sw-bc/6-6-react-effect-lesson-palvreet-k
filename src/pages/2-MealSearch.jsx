@@ -70,6 +70,8 @@ export default function MealFetchOnChange() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+   const API_URL = 'https://www.themealdb.com/api/json/v1/1/search.php?s='
+
   // 2. Write a useEffect that re-runs whenever searchTerm changes
   //    - Build the URL using the searchTerm value
   //    - Define an async function inside the effect
@@ -78,9 +80,29 @@ export default function MealFetchOnChange() {
   //    - On success: call setMeals with the meals array from the response
   useEffect(() => {
     // TODO: write your async fetch function here
+    async function fetchMeal() {
+      try {
+        const response = await fetch(API_URL+searchTerm);
 
+        if (!response.ok) {
+          throw new Error('Some problem with API, try again')
+        }
+
+        //convert json to javascript
+        const data = await response.json();
+        setMeals(data.meals);
+      }
+      catch (err) {
+        setError(err.message);
+      }
+      finally {
+      setLoading(false);  // Weather displayed or error displayed so we have to stop loading message
+      }
+  }
+  fetchMeal();
     // TODO: call it
-  }, []); // TODO: what belongs in this dependency array?
+  }, [searchTerm]); // TODO: what belongs in this dependency array?
+  // loads first time and also every time searchTerm changes
 
   if (loading) return <p>Loading meals...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -107,16 +129,19 @@ export default function MealFetchOnChange() {
 
       {/* TODO in class: replace the two hardcoded MealCards below with a .map() over meals */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-        <MealCard
-          name={meals[0].strMeal}
-          image={meals[0].strMealThumb}
-          instructions={meals[0].strInstructions}
-        />
-        <MealCard
-          name={meals[1].strMeal}
-          image={meals[1].strMealThumb}
-          instructions={meals[1].strInstructions}
-        />
+
+       {/* Ternary operator ? one: two */}
+       {
+        (!meals|| meals.length==0)?<p>No meals</p>:
+       
+        meals.map((meal) => ( //use ( )instead of {} as it has implict return
+          <MealCard
+            name={meal.strMeal}
+            image={meal.strMealThumb}
+            instructions={meal.strInstructions}
+          />
+        ))
+        }
       </div>
 
     </div>

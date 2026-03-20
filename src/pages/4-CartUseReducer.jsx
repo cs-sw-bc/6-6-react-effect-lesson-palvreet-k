@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { act, useReducer } from "react";
 
 const menuItems = [
   { id: 1, name: "Latte", price: 5.5 },
@@ -46,22 +46,38 @@ const initialState = {
 //    - Returns new state using spread: { ...state, fieldToChange: newValue }
 //    - Never mutates state directly
 
+function reducer(state, action){
+  if(action.type==="ADD"){
+    return {
+      ...state, // copy the current state
+      items:[...state.items, action.item], // take current items(null), add item we clicked
+      itemCount: state.itemCount+1,
+      totalPrice: state.totalPrice + action.item.price
+    }
+  }
+  else if(action.type==="DISCOUNT"){
+    return {
+      ...state, 
+      discount: action.amount,
+      totalPrice: state.totalPrice * (1- (action.amount/100))
+    }
+  }
+}
 
 export default function CartUseReducer() {
   // 3. Wire up useReducer
-
+  const[state, dispatch] = useReducer(reducer, initialState);
 
 
   // 4. Each handler dispatches one action — the reducer handles the rest
   //    Compare these to CartUseState.jsx where each handler called multiple setters
   function handleAddItem(item)          {
-    
+    dispatch({type: "ADD", item});
   }
-  function handleRemoveItem(item)       {
-
+  function handleRemoveItem()       {
   }
   function handleApplyDiscount(amount)  {
-
+    dispatch({type: "DISCOUNT", amount});
   }
   function handleCheckout()             {
 
